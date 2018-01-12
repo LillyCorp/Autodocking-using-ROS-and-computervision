@@ -1,0 +1,29 @@
+<launch>
+  <arg name="model" default="$(find junkbot)/urdf/junk.urdf.xacro"/>
+  <arg name="rvizconfig" default="$(find junkbot)/rviz/urdf.rviz" />
+
+  
+  
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" />
+
+  <rosparam command="load"
+            file="$(find junkbot)/config/joints.yaml"
+            ns="junkbot_joint_state_controller" />
+  
+  <rosparam command="load"
+            file="$(find junkbot)/config/diffdrive.yaml"
+            ns="junkbot_diff_drive_controller" />
+
+  <node name="junkbot_controller_spawner" pkg="controller_manager" type="spawner"
+    args="junkbot_joint_state_controller
+          junkbot_diff_drive_controller
+          --shutdown-timeout 3"/>
+
+  <node name="rqt_robot_steering" pkg="rqt_robot_steering" type="rqt_robot_steering">
+    <param name="default_topic" value="/junkbot/cmd_vel"/>
+  </node>
+
+  <node name="junkbot" pkg="junkbot" type="saber.py" output="screen"/>
+  <node name="camera" pkg="uvc_camera" type="uvc_camera_node" output="screen"/>
+</launch>
